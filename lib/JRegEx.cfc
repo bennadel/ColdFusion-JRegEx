@@ -1,6 +1,6 @@
 component
 	output = false
-	semvar = "0.0.1"
+	semvar = "0.0.2"
 	hint = "I provide a simplified API around the Regular Expression power of the underlying Java platform. There are no 'NoCase' method since Java RegEx Patterns can be made case-insensitive by start with a (?i) flag."
 	{
 
