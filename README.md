@@ -1,21 +1,126 @@
 
-# [WIP] JRegExp - A ColdFusion Wrapper Around Java's Regular Expression Patterns
+# JRegExp - A ColdFusion Wrapper Around Java's Regular Expression Patterns
 
 by [Ben Nadel][bennadel] (on [Google+][googleplus])
 
-This is a work in progress ...
-
 This is a ColdFusion wrapper around Java's Regular Expression pattern matching and
-replacing functionality.
+replacing functionality. The native ColdFusion POSIX Regular Expression support is both
+slow and somewhat limited. By using Java's Patterns, we can create faster, more robust
+pattern-matching solutions.
 
-* jreFind( targetText, patternText [, startingAt = 1 ] ) :: number
-* jreMatch( targetText, patternText ) :: array[string]
-* jreMatchGroups( targetText, patternText ) :: array[struct]
-* jreReplaceAll( targetText, patternText, replacementText [, quoteReplacement = false ] ) :: string
-* jreReplaceEach( targetText, patternText, operator ) :: string
-* jreReplaceFirst( targetText, patternText, replacementText [, quoteReplacement = false ] ) :: string
-* jreSplit( targetText, patternText [, limit = 0 ] ) :: array[string]
-* jreTest( targetText, patternText ) :: boolean
+Since ColdFusion uses 1-based offsets and Java uses 0-based offsets, any method that 
+returns an Offset will be adjusted to use ColdFusion's 1-based offsets.
+
+There are no *NoCase() versions of these methods. If you want to run a case-insensitive
+pattern match, simply prepend the case-insensitivity flag `(?i)` to your Regular 
+Expression pattern.
+
+## Methods
+
+### jreEscape( patternText ) :: string
+
+This takes a Java Regular Expression pattern and returns a literal version of it. This 
+literal version can then be used in other JRegEx methods. This is essentially what the 
+`quoteReplacement` argument is doing in some of the other methods.
+
+### jreFind( targetText, patternText [, startingAt = 1 ] ) :: number
+
+This finds the offset of the first Java Regular Expression pattern match in the given 
+target text. Returns zero if no match is found.
+
+### jreMap( targetText, patternText, operator ) :: array[any]
+
+This iterates over each match of the given Java Regular Expression pattern found within 
+the given target text. Each match and its captured groups are passed to the operator 
+function which can return a mapped value. The mapped values are then aggregated and 
+returned in an array. If the operator returns an undefined value, the match is omitted
+from the results.
+
+```cfc
+// Capture each word and return it with an upper-case first letter.
+var results = jre.jreMap(
+	"hello there",
+	"(\w)(\w*)",
+	function( $0, head, tail, start, targetText ) {
+
+		return( ucase( head ) & tail );
+
+	}
+);
+```
+
+### jreMatch( targetText, patternText ) :: array[string]
+
+This takes the given Java Regular Expression pattern and collects all matches of it 
+that can be found within the given target text. That matches are returned as an array
+of strings.
+
+### jreMatchGroups( targetText, patternText ) :: array[struct]
+
+This takes the given Java Regular Expression pattern and collects all matches of it 
+that can be found within the given target text. That matches are returned as an array
+of structs in which each struct holds the captured groups of the match. The struct is
+keyed based on the index of the captured group, within the pattern, with the `0` key 
+containing the entire match text.
+
+### jreReplace( targetText, patternText, operator ) :: string
+
+This iterates over each match of the given Java Regular Expression pattern found within
+the given target text and passes the match to the operator function / closure. The 
+operator function / closure can then return a replacement value that will be merged into
+the resultant text. This is based on JavaScript's String.prototype.replace() method.
+
+```cfc
+// Replace each first letter with an upper-case letter.
+var result = jre.jreReplace(
+	"hello there",
+	"\b[a-z]",
+	function( $0, start, targetText ) {
+
+		return( ucase( $0 ) );
+
+	}
+);
+```
+
+### jreReplaceAll( targetText, patternText, replacementText [, quoteReplacement = false ] ) :: string
+
+I replace all matches of the given Java Regular Expression pattern found within the given
+target text with the given replacement text. The replacement text can contain `$N` 
+references to captured groups within the pattern.
+
+### jreReplaceFirst( targetText, patternText, replacementText [, quoteReplacement = false ] ) :: string
+
+I replace the first match of the given Java Regular Expression pattern found within the 
+given target text with the given replacement text. The replacement text can contain `$N`
+references to captured groups within the pattern.
+
+### jreSegment( targetText, patternText ) :: array[struct]
+
+I use the given Java Regular Expression pattern to break the given target text up into 
+segments. Unlike the `jreSplit()` method, this method returns both the pattern matches as
+well as the text in between the matches. The resultant array contains a heterogeneous mix
+of match and non-match structs. Each struct contains the following properties:
+
+* `Match`: Boolean
+* `Offset`: Numeric
+* `Text`: String
+
+Match structs also contain the property:
+
+* `Groups`: Struct[Numeric] :: String
+
+... which contains the captured groups of the match.
+
+### jreSplit( targetText, patternText [, limit = 0 ] ) :: array[string]
+
+I use the given Java Regular Expression pattern to split the given target text. The 
+resultant portions of the target text are returned as an array of strings.
+
+### jreTest( targetText, patternText ) :: boolean
+
+I test to see if the given Java Regular Expression pattern matches the entire target 
+text. You can think of this as wrapping your pattern with `^` and `$` boundary sequences.
 
 
 [bennadel]: http://www.bennadel.com

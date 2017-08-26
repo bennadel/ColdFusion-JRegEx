@@ -20,6 +20,21 @@ component
 
 
 	/**
+	* I escape the given Java Regular Expression pattern such that it will match as a
+	* literal expression in a Java Regular Expression search. This is equivalent to what
+	* the "quoteReplacement" arguments are doing in the other methods.
+	* 
+	* @patternText I am the Java Regular Expression pattern being escaped.
+	* @output false
+	*/
+	public string function jreEscape( required string patternText ) {
+
+		return( createObject( "java", "java.util.regex.Pattern" ).quote( javaCast( "string", patternText ) ) );
+
+	}
+
+
+	/**
 	* I determine the index of the first Java Regular Expression pattern within the given
 	* target text. If no match can be found, returns zero.
 	* 
@@ -45,6 +60,71 @@ component
 		}
 
 		return( 0 );
+
+	}
+
+
+	/**
+	* I use Java's Pattern / Matcher libraries to map matched patterns onto a resultant
+	* array using the given operator function or closure. If the operator returns an
+	* undefined value, nothing is added to the results for the given match.
+	*
+	* @targetText I am the text being scanned.
+	* @patternText I am the Java Regular Expression pattern used to locate matches.
+	* @operator I am the Function or Closure used to provide the match mapping.
+	* @output false
+	*/
+	public array function jreMap(
+		required string targetText,
+		required string patternText,
+		required function operator
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+		var results = [];
+
+		// Iterate over each pattern match in the target text.
+		while ( matcher.find() ) {
+
+			// When preparing the arguments for the operator, we need to construct an
+			// argumentCollection structure in which the argument index is the numeric
+			// key of the argument offset. In order to simplify overlaying the pattern
+			// group matching over the arguments array, we're simply going to keep an
+			// incremented offset every time we add an argument.
+			var operatorArguments = {};
+			var operatorArgumentOffset = 1; // Will be incremented with each argument.
+
+			var groupCount = matcher.groupCount();
+
+			// NOTE: Calling .group(0) is equivalent to calling .group(), which will
+			// return the entire match, not just a capturing group.
+			for ( var i = 0 ; i <= groupCount ; i++ ) {
+
+				operatorArguments[ operatorArgumentOffset++ ] = matcher.group( javaCast( "int", i ) );
+
+			}
+
+			// Including the match offset and the original content for parity with the
+			// jreReplace() method, which also uses an operator for per-match logic.
+			// --
+			// NOTE: We're adding 1 to the offset since ColdFusion starts offsets at 1
+			// where as Java starts offsets at 0.
+			operatorArguments[ operatorArgumentOffset++ ] = ( matcher.start() + 1 );
+			operatorArguments[ operatorArgumentOffset++ ] = targetText;
+
+			var mappedMatch = operator( argumentCollection = operatorArguments );
+
+			// The operator can return an undefined value to exclude the given match from
+			// the results. As such, only append the value if it is defined.
+			if ( ! isNull( mappedMatch ) ) {
+
+				arrayAppend( results, mappedMatch );
+
+			}
+
+		}
+
+		return( results );
 
 	}
 
@@ -128,35 +208,6 @@ component
 
 
 	/**
-	* I replace all instances of the given Java Regular Expression pattern matches with
-	* the given replacement text.
-	* 
-	* @targetText I am the text being scanned.
-	* @patternText I am the Java Regular Expression pattern used to locate matches.
-	* @replacementText I am the text replacing the pattern matches. I can use $ to reference captured groups.
-	* @quoteReplacement I determine if the replacement text should be escaped (so as not to accidentally reference captured groups).
-	* @output false
-	*/
-	public string function jreReplaceAll(
-		required string targetText,
-		required string patternText,
-		required string replacementText,
-		boolean quoteReplacement = false
-		) {
-
-		var matcher = createMatcher( targetText, patternText );
-
-		var result = quoteReplacement
-			? matcher.replaceAll( matcher.quoteReplacement( javaCast( "string", replacementText ) ) )
-			: matcher.replaceAll( javaCast( "string", replacementText ) )
-		;
-
-		return( result );
-
-	}
-
-
-	/**
 	* I use Java's Pattern / Matcher libraries to replace matched patterns using the
 	* given operator function or closure.
 	*
@@ -165,7 +216,7 @@ component
 	* @operator I am the Function or Closure used to provide the match replacements.
 	* @output false
 	*/
-	public string function jreReplaceEach(
+	public string function jreReplace(
 		required string targetText,
 		required string patternText,
 		required function operator
@@ -232,6 +283,35 @@ component
 
 
 	/**
+	* I replace all instances of the given Java Regular Expression pattern matches with
+	* the given replacement text.
+	* 
+	* @targetText I am the text being scanned.
+	* @patternText I am the Java Regular Expression pattern used to locate matches.
+	* @replacementText I am the text replacing the pattern matches. I can use $ to reference captured groups.
+	* @quoteReplacement I determine if the replacement text should be escaped (so as not to accidentally reference captured groups).
+	* @output false
+	*/
+	public string function jreReplaceAll(
+		required string targetText,
+		required string patternText,
+		required string replacementText,
+		boolean quoteReplacement = false
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+
+		var result = quoteReplacement
+			? matcher.replaceAll( matcher.quoteReplacement( javaCast( "string", replacementText ) ) )
+			: matcher.replaceAll( javaCast( "string", replacementText ) )
+		;
+
+		return( result );
+
+	}
+
+
+	/**
 	* I replace the first instance of the given Java Regular Expression pattern match
 	* with the given replacement text, 
 	* 
@@ -256,6 +336,112 @@ component
 		;
 
 		return( result );
+
+	}
+
+
+	/**
+	* I segment the given target text using the given Java Regular Expression pattern. 
+	* This results in an array of both matches and non-matches, each of which have the
+	* following properties:
+	* 
+	* - Match: Boolean
+	* - Offset: Numeric
+	* - Text: String
+	* 
+	* ... where "match" segments will also have the following property that contains 
+	* the captured groups of the given segment (similar to the jreMatchGroups() method):
+	* 
+	* - Groups: Struct[Numeric]:String
+	* 
+	* @targetText I am the text being segmented.
+	* @patternText I am the Java Regular Expression pattern used to segment.
+	* @output false
+	*/
+	public array function jreSegment(
+		required string targetText,
+		required string patternText
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+		var segments = [];
+
+		// As we iterate through the matches, we're going to need to slice the portions
+		// of the target text that exist in between each match (as well as the leading 
+		// and trailing sections).
+		var slicer = javaCast( "string", targetText );
+		var sliceStart = 0;
+
+		// Iterate over each pattern match in the target text.
+		while ( matcher.find() ) {
+
+			// Each result will be a structure in which the keys correspond to the index
+			// of the captured groups with the zero-key being the entire match.
+			var groups = {};
+			var groupCount = matcher.groupCount();
+
+			// Add each captured group to the resultant struct.
+			for ( var i = 0 ; i <= groupCount ; i++ ) {
+
+				groups[ i ] = matcher.group( javaCast( "int", i ) );
+
+				// If the group failed to match, it will be undefined. In order to make
+				// this easier to consume, let's report it as the empty string.
+				if ( ! structKeyExists( groups, i ) ) {
+
+					groups[ i ] = "";
+
+				}
+
+			}
+
+			// If the start of the current match is different than the next slice start,
+			// it means there is some interstitial text between this match and the 
+			// previous match (or the start of the string).
+			if ( matcher.start() != sliceStart ) {
+
+				arrayAppend(
+					segments,
+					{
+						match: false,
+						text: slicer.substring( javaCast( "int", sliceStart ), matcher.start() ),
+						offset: ( sliceStart + 1 ) // Adjust for ColdFusion 1-based offsets.
+					}
+				);
+
+			}
+			
+			arrayAppend(
+				segments,
+				{
+					match: true,
+					text: matcher.group(),
+					offset: ( matcher.start() + 1 ), // Adjust for ColdFusion 1-based offsets.
+					groups: groups
+				}
+			);
+
+			// Adjust slicer to account for the length of the current match.
+			sliceStart = matcher.end();
+
+		}
+
+		// If the last match didn't contain the tail-end of the target text, then our 
+		// last non-match will be the tail of the target text.
+		if ( sliceStart < slicer.length() ) {
+
+			arrayAppend(
+				segments,
+				{
+					match: false,
+					text: slicer.substring( javaCast( "int", sliceStart ) ),
+					offset: ( sliceStart + 1 ) // Adjust for ColdFusion 1-based offsets.
+				}
+			);
+
+		}
+
+		return( segments );
 
 	}
 
