@@ -1,5 +1,5 @@
 
-# JRegExp - A ColdFusion Wrapper Around Java's Regular Expression Patterns
+# JRegEx - A ColdFusion Wrapper Around Java's Regular Expression Patterns
 
 by [Ben Nadel][bennadel] (on [Google+][googleplus])
 
