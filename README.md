@@ -28,6 +28,26 @@ literal version can then be used in other JRegEx methods. This is essentially wh
 This finds the offset of the first Java Regular Expression pattern match in the given 
 target text. Returns zero if no match is found.
 
+### jreForEach( targetText, patternText, operator ) :: array[any]
+
+This iterates over each match of the given Java Regular Expression pattern found within 
+the given target text. Each match and its captured groups are passed to the operator 
+function. All operator function return values are ignored.
+
+```cfc
+// Count the number of matched patterns.
+var count = 0;
+jre.jreForEach(
+	"hello there",
+	"\b\w+\b",
+	function( $0, start, targetText ) {
+
+		count++;
+
+	}
+);
+```
+
 ### jreMap( targetText, patternText, operator ) :: array[any]
 
 This iterates over each match of the given Java Regular Expression pattern found within 

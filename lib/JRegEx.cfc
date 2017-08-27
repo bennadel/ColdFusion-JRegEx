@@ -65,6 +65,60 @@ component
 
 
 	/**
+	* I use Java's Pattern / Matcher libraries to iterate over each matched pattern in
+	* the given target text. Each match, including its captured groups, is passed to the
+	* operator. Any return value is ignored.
+	*
+	* @targetText I am the text being scanned.
+	* @patternText I am the Java Regular Expression pattern used to locate matches.
+	* @operator I am the Function or Closure used to provide the match iteration.
+	* @output false
+	*/
+	public void function jreForEach(
+		required string targetText,
+		required string patternText,
+		required function operator
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+
+		// Iterate over each pattern match in the target text.
+		while ( matcher.find() ) {
+
+			// When preparing the arguments for the operator, we need to construct an
+			// argumentCollection structure in which the argument index is the numeric
+			// key of the argument offset. In order to simplify overlaying the pattern
+			// group matching over the arguments array, we're simply going to keep an
+			// incremented offset every time we add an argument.
+			var operatorArguments = {};
+			var operatorArgumentOffset = 1; // Will be incremented with each argument.
+
+			var groupCount = matcher.groupCount();
+
+			// NOTE: Calling .group(0) is equivalent to calling .group(), which will
+			// return the entire match, not just a capturing group.
+			for ( var i = 0 ; i <= groupCount ; i++ ) {
+
+				operatorArguments[ operatorArgumentOffset++ ] = matcher.group( javaCast( "int", i ) );
+
+			}
+
+			// Including the match offset and the original content for parity with the
+			// jreReplace() method, which also uses an operator for per-match logic.
+			// --
+			// NOTE: We're adding 1 to the offset since ColdFusion starts offsets at 1
+			// where as Java starts offsets at 0.
+			operatorArguments[ operatorArgumentOffset++ ] = ( matcher.start() + 1 );
+			operatorArguments[ operatorArgumentOffset++ ] = targetText;
+
+			operator( argumentCollection = operatorArguments );
+
+		}
+
+	}
+
+
+	/**
 	* I use Java's Pattern / Matcher libraries to map matched patterns onto a resultant
 	* array using the given operator function or closure. If the operator returns an
 	* undefined value, nothing is added to the results for the given match.

@@ -34,6 +34,44 @@ component
 	}
 
 
+	public void function testJreForEach() {
+
+		var jre = new lib.JRegEx();
+
+		var count = 0;
+		var results = jre.jreForEach(
+			"abc",
+			"(\w)",
+			function( $0, $1, start, targetText ) {
+
+				count++;
+
+				switch ( start ) {
+					case 1:
+						assert( $0 == "a" );
+					break;
+					case 2:
+						assert( $0 == "b" );
+					break;
+					case 3:
+						assert( $0 == "c" );
+					break;
+					default:
+						fail();
+					break;
+				}
+
+				assert( $0 == $1 );
+				assert( targetText == "abc" );
+
+			}
+		);
+
+		assert( count == 3 );
+
+	}
+
+
 	public void function testJreMap() {
 
 		var jre = new lib.JRegEx();
@@ -58,7 +96,7 @@ component
 		assert( arrayLen( results ) == 2 );
 		assert( ! compare( results[ 1 ], "A" ) );
 		assert( ! compare( results[ 2 ], "E" ) );
-	
+
 	}
 
 
