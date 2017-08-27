@@ -184,27 +184,7 @@ component
 		// Iterate over each pattern match in the target text.
 		while ( matcher.find() ) {
 
-			// Each result will be a structure in which the keys correspond to the index
-			// of the captured groups with the zero-key being the entire match.
-			var groups = {};
-			var groupCount = matcher.groupCount();
-
-			// Add each captured group to the resultant struct.
-			for ( var i = 0 ; i <= groupCount ; i++ ) {
-
-				groups[ i ] = matcher.group( javaCast( "int", i ) );
-
-				// If the group failed to match, it will be undefined. In order to make
-				// this easier to consume, let's report it as the empty string.
-				if ( ! structKeyExists( groups, i ) ) {
-
-					groups[ i ] = "";
-
-				}
-
-			}
-
-			arrayAppend( results, groups );
+			arrayAppend( results, createCapturedGroups( matcher ) );
 
 		}
 
@@ -357,26 +337,6 @@ component
 		// Iterate over each pattern match in the target text.
 		while ( matcher.find() ) {
 
-			// Each result will be a structure in which the keys correspond to the index
-			// of the captured groups with the zero-key being the entire match.
-			var groups = {};
-			var groupCount = matcher.groupCount();
-
-			// Add each captured group to the resultant struct.
-			for ( var i = 0 ; i <= groupCount ; i++ ) {
-
-				groups[ i ] = matcher.group( javaCast( "int", i ) );
-
-				// If the group failed to match, it will be undefined. In order to make
-				// this easier to consume, let's report it as the empty string.
-				if ( ! structKeyExists( groups, i ) ) {
-
-					groups[ i ] = "";
-
-				}
-
-			}
-
 			// If the start of the current match is different than the next slice start,
 			// it means there is some interstitial text between this match and the 
 			// previous match (or the start of the string).
@@ -399,7 +359,7 @@ component
 					match: true,
 					text: matcher.group(),
 					offset: ( matcher.start() + 1 ), // Adjust for ColdFusion 1-based offsets.
-					groups: groups
+					groups: createCapturedGroups( matcher )
 				}
 			);
 
@@ -483,6 +443,40 @@ component
 	private any function createBuffer() {
 
 		return( createObject( "java", "java.lang.StringBuffer" ).init() );
+
+	}
+
+
+	/**
+	* I translate the current match into a struct of captured groups, with the entire 
+	* match as the zero key.
+	* 
+	* @matcher I am the matcher that is mid-iteration of matched patterns.
+	* @output false
+	*/
+	private struct function createCapturedGroups( required any matcher ) {
+
+		// Each set of captured groups will be a structure in which the keys correspond
+		// to the index of the captured group with the zero-key being the entire match.
+		var groups = {};
+		var groupCount = matcher.groupCount();
+
+		// Add each captured group to the resultant struct.
+		for ( var i = 0 ; i <= groupCount ; i++ ) {
+
+			groups[ i ] = matcher.group( javaCast( "int", i ) );
+
+			// If the group failed to match, it will be undefined. In order to make this
+			// easier to consume, let's report it as the empty string.
+			if ( ! structKeyExists( groups, i ) ) {
+
+				groups[ i ] = "";
+
+			}
+
+		}
+
+		return( groups );
 
 	}
 
