@@ -85,33 +85,9 @@ component
 		// Iterate over each pattern match in the target text.
 		while ( matcher.find() ) {
 
-			// When preparing the arguments for the operator, we need to construct an
-			// argumentCollection structure in which the argument index is the numeric
-			// key of the argument offset. In order to simplify overlaying the pattern
-			// group matching over the arguments array, we're simply going to keep an
-			// incremented offset every time we add an argument.
-			var operatorArguments = {};
-			var operatorArgumentOffset = 1; // Will be incremented with each argument.
-
-			var groupCount = matcher.groupCount();
-
-			// NOTE: Calling .group(0) is equivalent to calling .group(), which will
-			// return the entire match, not just a capturing group.
-			for ( var i = 0 ; i <= groupCount ; i++ ) {
-
-				operatorArguments[ operatorArgumentOffset++ ] = matcher.group( javaCast( "int", i ) );
-
-			}
-
-			// Including the match offset and the original content for parity with the
-			// jreReplace() method, which also uses an operator for per-match logic.
-			// --
-			// NOTE: We're adding 1 to the offset since ColdFusion starts offsets at 1
-			// where as Java starts offsets at 0.
-			operatorArguments[ operatorArgumentOffset++ ] = ( matcher.start() + 1 );
-			operatorArguments[ operatorArgumentOffset++ ] = targetText;
-
-			operator( argumentCollection = operatorArguments );
+			// Pass the matched groups, offset, and original text to the operator. This
+			// creates a signature like operator( $0, ...$N, start, targetText ).
+			operator( argumentCollection = createOperatorArguments( matcher, targetText ) );
 
 		}
 
@@ -140,33 +116,9 @@ component
 		// Iterate over each pattern match in the target text.
 		while ( matcher.find() ) {
 
-			// When preparing the arguments for the operator, we need to construct an
-			// argumentCollection structure in which the argument index is the numeric
-			// key of the argument offset. In order to simplify overlaying the pattern
-			// group matching over the arguments array, we're simply going to keep an
-			// incremented offset every time we add an argument.
-			var operatorArguments = {};
-			var operatorArgumentOffset = 1; // Will be incremented with each argument.
-
-			var groupCount = matcher.groupCount();
-
-			// NOTE: Calling .group(0) is equivalent to calling .group(), which will
-			// return the entire match, not just a capturing group.
-			for ( var i = 0 ; i <= groupCount ; i++ ) {
-
-				operatorArguments[ operatorArgumentOffset++ ] = matcher.group( javaCast( "int", i ) );
-
-			}
-
-			// Including the match offset and the original content for parity with the
-			// jreReplace() method, which also uses an operator for per-match logic.
-			// --
-			// NOTE: We're adding 1 to the offset since ColdFusion starts offsets at 1
-			// where as Java starts offsets at 0.
-			operatorArguments[ operatorArgumentOffset++ ] = ( matcher.start() + 1 );
-			operatorArguments[ operatorArgumentOffset++ ] = targetText;
-
-			var mappedMatch = operator( argumentCollection = operatorArguments );
+			// Pass the matched groups, offset, and original text to the operator. This
+			// creates a signature like operator( $0, ...$N, start, targetText ).
+			var mappedMatch = operator( argumentCollection = createOperatorArguments( matcher, targetText ) );
 
 			// The operator can return an undefined value to exclude the given match from
 			// the results. As such, only append the value if it is defined.
@@ -282,33 +234,9 @@ component
 		// Iterate over each pattern match in the target text.
 		while ( matcher.find() ) {
 
-			// When preparing the arguments for the operator, we need to construct an
-			// argumentCollection structure in which the argument index is the numeric
-			// key of the argument offset. In order to simplify overlaying the pattern
-			// group matching over the arguments array, we're simply going to keep an
-			// incremented offset every time we add an argument.
-			var operatorArguments = {};
-			var operatorArgumentOffset = 1; // Will be incremented with each argument.
-
-			var groupCount = matcher.groupCount();
-
-			// NOTE: Calling .group(0) is equivalent to calling .group(), which will
-			// return the entire match, not just a capturing group.
-			for ( var i = 0 ; i <= groupCount ; i++ ) {
-
-				operatorArguments[ operatorArgumentOffset++ ] = matcher.group( javaCast( "int", i ) );
-
-			}
-
-			// Including the match offset and the original content for parity with the
-			// JavaScript String.replace() function on which this algorithm is based.
-			// --
-			// NOTE: We're adding 1 to the offset since ColdFusion starts offsets at 1
-			// where as Java starts offsets at 0.
-			operatorArguments[ operatorArgumentOffset++ ] = ( matcher.start() + 1 );
-			operatorArguments[ operatorArgumentOffset++ ] = targetText;
-
-			var replacement = operator( argumentCollection = operatorArguments );
+			// Pass the matched groups, offset, and original text to the operator. This
+			// creates a signature like operator( $0, ...$N, start, targetText ).
+			var replacement = operator( argumentCollection = createOperatorArguments( matcher, targetText ) );
 
 			// In the event the operator doesn't return a value, we'll assume that the
 			// intention is to replace the match with nothing.
@@ -577,6 +505,52 @@ component
 		;
 
 		return( matcher );
+
+	}
+
+
+	/**
+	* I create the argumentCollection that can be used to invoke a common operator()
+	* function / closure. This will create a signature with the following arguments:
+	* 
+	* operator( $0, ...$N, start, targetText )
+	* 
+	* @matcher I am the matcher that is mid-iteration of matched patterns.
+	* @targetText I am the text being scanned.
+	* @output false
+	*/
+	private struct function createOperatorArguments(
+		required any matcher,
+		required string targetText
+		) {
+
+		// When preparing the arguments for the operator, we need to construct an
+		// argumentCollection structure in which the argument index is the numeric key 
+		// of the argument offset. In order to simplify overlaying the pattern group 
+		// matching over the arguments array, we're simply going to keep an incremented
+		// offset every time we add an argument.
+		var operatorArguments = {};
+		var operatorArgumentOffset = 1; // Will be incremented with each argument.
+
+		var groupCount = matcher.groupCount();
+
+		// NOTE: Calling .group(0) is equivalent to calling .group(), which will return
+		// the entire match, not just a capturing group.
+		for ( var i = 0 ; i <= groupCount ; i++ ) {
+
+			operatorArguments[ operatorArgumentOffset++ ] = matcher.group( javaCast( "int", i ) );
+
+		}
+
+		// Including the match offset and the original content for parity with the 
+		// JavaScript String.replace() function on which this algorithm is based.
+		// --
+		// NOTE: We're adding 1 to the offset since ColdFusion starts offsets at 1 where
+		// as Java starts offsets at 0.
+		operatorArguments[ operatorArgumentOffset++ ] = ( matcher.start() + 1 );
+		operatorArguments[ operatorArgumentOffset++ ] = targetText;
+
+		return( operatorArguments );
 
 	}
 
