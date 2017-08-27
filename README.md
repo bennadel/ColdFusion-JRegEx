@@ -28,7 +28,7 @@ literal version can then be used in other JRegEx methods. This is essentially wh
 This finds the offset of the first Java Regular Expression pattern match in the given 
 target text. Returns zero if no match is found.
 
-### jreForEach( targetText, patternText, operator ) :: array[any]
+### jreForEach( targetText, patternText, operator ) :: void
 
 This iterates over each match of the given Java Regular Expression pattern found within 
 the given target text. Each match and its captured groups are passed to the operator 
