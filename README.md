@@ -1,7 +1,7 @@
 
 # JRegEx - A ColdFusion Wrapper Around Java's Regular Expression Patterns
 
-by [Ben Nadel][bennadel] (on [Google+][googleplus])
+by [Ben Nadel][bennadel]
 
 This is a ColdFusion wrapper around Java's Regular Expression pattern matching and
 replacing functionality. The native ColdFusion POSIX Regular Expression support is both
@@ -142,6 +142,19 @@ resultant portions of the target text are returned as an array of strings.
 I test to see if the given Java Regular Expression pattern matches the entire target 
 text. You can think of this as wrapping your pattern with `^` and `$` boundary sequences.
 
+## JRegExList
 
-[bennadel]: http://www.bennadel.com
-[googleplus]: https://plus.google.com/108976367067760160494?rel=author
+While there is significantly less value to being able to parse ColdFusion lists using Regular Expressions, I've added a sibling component, `JRegExList.cfc`, that has methods for parsing lists using a _RegEx delimiter_.
+
+* `jreListFirst( list, delimiterPattern [, includeEmptyFields] )` :: String
+* `jreListGetAt( list, position, delimiterPattern [, includeEmptyFields] )` :: String
+* `jreListLast( list, delimiterPattern [, includeEmptyFields] )` :: String
+* `jreListLen( list, delimiterPattern [, includeEmptyFields] )` :: Number
+* `jreListMap( list, callback, delimiterPattern [, includeEmptyFields] )` :: String
+* `jreListRest( list, delimiterPattern [, includeEmptyFields] )` :: String
+* `jreListSetAt( list, position, value, delimiterPattern [, includeEmptyFields] )` :: String
+* `jreListToArray( list, delimiterPattern [, includeEmptyFields] )` :: Array
+* `jreSegment( list, delimiterPattern )` :: Array
+
+
+[bennadel]: https://www.bennadel.com/
