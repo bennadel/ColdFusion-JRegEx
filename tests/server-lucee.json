@@ -1,0 +1,10 @@
+{
+    "app":{
+        "cfengine":"lucee"
+    },
+    "name":"lucee-jregex",
+    "jvm":{
+        "args":"-Dlucee.preserve.case=true"
+    },
+    "server":"lucee-jregex"
+}

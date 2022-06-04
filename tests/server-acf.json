@@ -1,0 +1,7 @@
+{
+    "app":{
+        "cfengine":"adobe"
+    },
+    "name":"adobe-jregex",
+    "server":"adobe-jregex"
+}

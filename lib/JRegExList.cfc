@@ -4,6 +4,19 @@ component
 	{
 
 	/**
+	* I initialize the component.
+	*/
+	public void function init() {
+
+		CollectionsClass = createObject( "java", "java.util.Collections" );
+
+	}
+
+	// ---
+	// PUBLIC METHODS.
+	// ---
+
+	/**
 	* I return the first item in the list using the given RegEx delimiter pattern.
 	*/
 	public string function jreListFirst(
@@ -72,10 +85,10 @@ component
 		boolean includeEmptyFields = false
 		) {
 
-		// CAUTION: We are calling .reverse() on the segments. This means that by finding
-		// the FIRST item in the resultant array, we're actually finding the LAST item in
-		// the original array.
-		for ( var segment in jreSegment( list, delimiterPattern ).reverse() ) {
+		// CAUTION: We are calling reverseOrder() on the segments. This means that by
+		// finding the FIRST item in the resultant array, we're actually finding the LAST
+		// item in the original array.
+		for ( var segment in reverseOrder( jreSegment( list, delimiterPattern ) ) ) {
 
 			if ( segment.isItem && ( segment.text.len() || includeEmptyFields ) ) {
 
@@ -133,7 +146,7 @@ component
 
 			if ( segment.isItem && ( segment.text.len() || includeEmptyFields ) ) {
 
-				segment.text = ( callback( segment.text, ++itemCount, list, delimiterPattern, includeEmptyFields ) ?: "" );
+				segment.text = callback( segment.text, ++itemCount, list, delimiterPattern, includeEmptyFields );
 
 			}
 
@@ -350,6 +363,17 @@ component
 		;
 
 		return( list );
+
+	}
+
+
+	/**
+	* I reverse the order of the items in the given array.
+	*/
+	private array function reverseOrder( required array values ) {
+
+		CollectionsClass.reverse( values );
+		return( values );
 
 	}
 
