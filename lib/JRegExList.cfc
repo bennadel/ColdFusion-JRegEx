@@ -8,7 +8,7 @@ component
 	*/
 	public void function init() {
 
-		CollectionsClass = createObject( "java", "java.util.Collections" );
+		variables.CollectionsClass = createObject( "java", "java.util.Collections" );
 
 	}
 

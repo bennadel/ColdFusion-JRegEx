@@ -4,7 +4,90 @@ component
 	hint = "I test JRegEx."
 	{
 
-	public void function testJreEscape() {
+	public void function test_jreAfter() {
+
+		var jre = new lib.JRegEx();
+
+		assert( jre.jreAfter( "abcdef", "c" ) == "def" );
+		assert( jre.jreAfter( "abcdef", "[cd]+" ) == "ef" );
+		assert( jre.jreAfter( "abcdef", "abcdef" ) == "" );
+		assert( jre.jreAfter( "abcdef", "-" ) == "" );
+		assert( jre.jreAfter( "https://www.bennadel.com/foo/bar/baz", "https?://[^/]+" ) == "/foo/bar/baz" );
+
+	}
+
+
+	public void function test_jreAfterLast() {
+
+		var jre = new lib.JRegEx();
+
+		assert( jre.jreAfterLast( "abcabc", "-" ) == "" );
+		assert( jre.jreAfterLast( "abcabc", "abc" ) == "" );
+		assert( jre.jreAfterLast( "abcabc", "b" ) == "c" );
+		assert( jre.jreAfterLast( "abcabc", "[ab]" ) == "c" );
+		assert( jre.jreAfterLast( "abcabc", "abcabc" ) == "" );
+		assert( jre.jreAfterLast( "https://www.bennadel.com/foo/bar/baz", "[\\/]+" ) == "baz" );
+
+	}
+
+
+	public void function test_jreBefore() {
+
+		var jre = new lib.JRegEx();
+
+		assert( jre.jreBefore( "abcabc", "-" ) == "abcabc" );
+		assert( jre.jreBefore( "abcabc", "a" ) == "" );
+		assert( jre.jreBefore( "abcabc", "b" ) == "a" );
+		assert( jre.jreBefore( "abcabc", "c" ) == "ab" );
+		assert( jre.jreBefore( "abcabc", "\Babc" ) == "abc" );
+
+	}
+
+
+	public void function test_jreBeforeLast() {
+
+		var jre = new lib.JRegEx();
+
+		assert( jre.jreBeforeLast( "abcabc", "-" ) == "abcabc" );
+		assert( jre.jreBeforeLast( "abcabc", "b+" ) == "abca" );
+		assert( jre.jreBeforeLast( "abcabc", "abcabc" ) == "" );
+		assert( jre.jreBeforeLast( "abcabc", "a" ) == "abc" );
+		assert( jre.jreBeforeLast( "abcabcabcabc", "abc" ) == "abcabcabc" );
+		assert( jre.jreBeforeLast( "https://www.bennadel.com/foo/bar/baz", "/" ) == "https://www.bennadel.com/foo/bar" );
+
+	}
+
+
+	public void function test_jreEndingWith() {
+
+		var jre = new lib.JRegEx();
+
+		assert( jre.jreEndingWith( "abcdef", "z" ) == "" );
+		assert( jre.jreEndingWith( "abcdef", "d" ) == "abcd" );
+		assert( jre.jreEndingWith( "abcdef", "[def]+" ) == "abcdef" );
+		assert( jre.jreEndingWith( "abcdef", "[def]" ) == "abcd" );
+		assert( jre.jreEndingWith( "abcdef", "a" ) == "a" );
+
+	}
+
+
+	public void function test_jreEndsWith() {
+
+		var jre = new lib.JRegEx();
+
+		assert( jre.jreEndsWith( "abcdef", "f" ) == true );
+		assert( jre.jreEndsWith( "abcdef", "f$" ) == true );
+		assert( jre.jreEndsWith( "abcdef", "f\z" ) == true );
+		assert( jre.jreEndsWith( "abcdef", "(?m)f\b\Z" ) == true );
+		assert( jre.jreEndsWith( "abcdef", "def" ) == true );
+		assert( jre.jreEndsWith( "abcdef", "abc" ) == false );
+		assert( jre.jreEndsWith( "abcdef", "abcdef" ) == true );
+		assert( jre.jreEndsWith( "abcdef", "[a-z]+" ) == true );
+
+	}
+
+
+	public void function test_jreEscape() {
 
 		var jre = new lib.JRegEx();
 
@@ -13,7 +96,7 @@ component
 	}
 
 
-	public void function testJreFind() {
+	public void function test_jreFind() {
 
 		var jre = new lib.JRegEx();
 
@@ -34,7 +117,7 @@ component
 	}
 
 
-	public void function testJreForEach() {
+	public void function test_jreForEach() {
 
 		var jre = new lib.JRegEx();
 
@@ -72,7 +155,7 @@ component
 	}
 
 
-	public void function testJreMap() {
+	public void function test_jreMap() {
 
 		var jre = new lib.JRegEx();
 
@@ -100,7 +183,7 @@ component
 	}
 
 
-	public void function testJreMatch() {
+	public void function test_jreMatch() {
 
 		var jre = new lib.JRegEx();
 
@@ -114,7 +197,7 @@ component
 	}
 
 
-	public void function testJreMatchGroups() {
+	public void function test_jreMatchGroups() {
 
 		var jre = new lib.JRegEx();
 
@@ -136,7 +219,7 @@ component
 	}
 
 
-	public void function testJreReplace() {
+	public void function test_jreReplace() {
 
 		var jre = new lib.JRegEx();
 
@@ -200,7 +283,7 @@ component
 	}
 
 
-	public void function testJreReplaceAll() {
+	public void function test_jreReplaceAll() {
 
 		var jre = new lib.JRegEx();
 
@@ -213,7 +296,7 @@ component
 	}
 
 
-	public void function testJreReplaceFirst() {
+	public void function test_jreReplaceFirst() {
 
 		var jre = new lib.JRegEx();
 
@@ -226,7 +309,7 @@ component
 	}
 
 
-	public void function testJreSegment() {
+	public void function test_jreSegment() {
 
 		var jre = new lib.JRegEx();
 
@@ -263,7 +346,7 @@ component
 	}
 
 
-	public void function testJreSplit() {
+	public void function test_jreSplit() {
 
 		var jre = new lib.JRegEx();
 
@@ -283,7 +366,35 @@ component
 	}
 
 
-	public void function testJreTest() {
+	public void function test_jreStartingWith() {
+
+		var jre = new lib.JRegEx();
+
+		assert( jre.jreStartingWith( "abcdef", "abcdef" ) == "abcdef" );
+		assert( jre.jreStartingWith( "abcdef", "[cd]+" ) == "cdef" );
+		assert( jre.jreStartingWith( "abcdef", "-" ) == "" );
+		assert( jre.jreStartingWith( "abcabcd", "\Babc" ) == "abcd" );
+
+	}
+
+
+	public void function test_jreStartsWith() {
+
+		var jre = new lib.JRegEx();
+
+		assert( jre.jreStartsWith( "abcdef", "a" ) == true );
+		assert( jre.jreStartsWith( "abcdef", "^a" ) == true );
+		assert( jre.jreStartsWith( "abcdef", "\Aa" ) == true );
+		assert( jre.jreStartsWith( "abcdef", "(?m)^a" ) == true );
+		assert( jre.jreStartsWith( "abcdef", "\ba" ) == true );
+		assert( jre.jreStartsWith( "abcdef", "[cab]+" ) == true );
+		assert( jre.jreStartsWith( "abcdef", "[cbd]+" ) == false );
+		assert( jre.jreStartsWith( "abcdef", "b" ) == false );
+
+	}
+
+
+	public void function test_jreTest() {
 
 		var jre = new lib.JRegEx();
 

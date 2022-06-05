@@ -1,6 +1,6 @@
 component
 	output = false
-	semvar = "0.0.2"
+	semvar = "0.0.3"
 	hint = "I provide a simplified API around the Regular Expression power of the underlying Java platform. There are no 'NoCase' method since Java RegEx Patterns can be made case-insensitive by start with a (?i) flag."
 	{
 
@@ -9,14 +9,168 @@ component
 	*/
 	public any function init() {
 
-		// ... nothing to do here.
+		variables.PatternClass = createObject( "java", "java.util.regex.Pattern" );
 
 	}
-
 
 	// ---
 	// PUBLIC METHODS.
 	// ---
+
+	/**
+	* I return the trailing portion of the string starting after the first match of the
+	* given pattern. If the pattern cannot be matched, the empty string is returned.
+	*/
+	public string function jreAfter(
+		required string targetText,
+		required string patternText
+		) {
+
+		// NOTE: Technically, CFML Strings are Java Strings; however, since we're going to
+		// dip down into the Java layer methods, it's comforting to explicitly cast the
+		// value to the native Java type, if for no other reason to provide some
+		// documentation as to where these method are coming from.
+		var parts = javaCast( "string", targetText )
+			.split( patternText, 2 )
+		;
+
+		return( ( arrayLen( parts ) == 2 ) ? parts[ 2 ] : "" );
+
+	}
+
+
+	/**
+	* I return the trailing portion of the string starting after the last match of the
+	* given pattern. If the pattern cannot be matched, the empty string is returned.
+	*/
+	public string function jreAfterLast(
+		required string targetText,
+		required string patternText
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+
+		if ( ! matcher.find() ) {
+
+			return( "" );
+
+		}
+
+		var previousEnd = matcher.end();
+
+		while ( matcher.find() ) {
+
+			previousEnd = matcher.end();
+
+		}
+
+		// NOTE: Technically, CFML Strings are Java Strings; however, since we're going to
+		// dip down into the Java layer methods, it's comforting to explicitly cast the
+		// value to the native Java type, if for no other reason to provide some
+		// documentation as to where these method are coming from.
+		return( javaCast( "string", targetText ).substring( previousEnd ) );
+
+	}
+
+
+	/**
+	* I return the leading portion of the string up until first match of the given
+	* pattern. If the pattern cannot be matched, the entire string is returned.
+	*/
+	public string function jreBefore(
+		required string targetText,
+		required string patternText
+		) {
+
+		// NOTE: Technically, CFML Strings are Java Strings; however, since we're going to
+		// dip down into the Java layer methods, it's comforting to explicitly cast the
+		// value to the native Java type, if for no other reason to provide some
+		// documentation as to where these method are coming from.
+		var parts = javaCast( "string", targetText )
+			.split( patternText, 2 )
+		;
+
+		return( parts[ 1 ] );
+
+	}
+
+
+	/**
+	* I return the leading portion of the string up until last match of the given pattern.
+	* If the pattern cannot be matched, the entire string is returned.
+	*/
+	public string function jreBeforeLast(
+		required string targetText,
+		required string patternText
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+
+		if ( ! matcher.find() ) {
+
+			return( targetText );
+
+		}
+
+		var previousStart = matcher.start();
+
+		while ( matcher.find() ) {
+
+			previousStart = matcher.start();
+
+		}
+
+		// NOTE: Technically, CFML Strings are Java Strings; however, since we're going to
+		// dip down into the Java layer methods, it's comforting to explicitly cast the
+		// value to the native Java type, if for no other reason to provide some
+		// documentation as to where these method are coming from.
+		return( javaCast( "string", targetText ).substring( 0, previousStart ) );
+
+	}
+
+
+	/**
+	* I return the leading portion of the string ending with the first match of the given
+	* pattern. If the pattern cannot be matched, the empty string is returned.
+	*/
+	public string function jreEndingWith(
+		required string targetText,
+		required string patternText
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+
+		if ( ! matcher.find() ) {
+
+			return( "" );
+
+		}
+
+		// NOTE: Technically, CFML Strings are Java Strings; however, since we're going to
+		// dip down into the Java layer methods, it's comforting to explicitly cast the
+		// value to the native Java type, if for no other reason to provide some
+		// documentation as to where these method are coming from.
+		return( javaCast( "string", targetText ).substring( 0, matcher.end() ) );
+
+	}
+
+
+	/**
+	* I determine if the given pattern can be matched at the end of the input.
+	*/
+	public boolean function jreEndsWith(
+		required string targetText,
+		required string patternText
+		) {
+
+		// In order to limit the amount of text that we have to search, let's anchor the
+		// pattern to the end of the input. It's OK if the pattern already has anchor
+		// boundaries - they can be doubled-up without consequence.
+		var matcher = createMatcher( targetText, ( patternText & "\z" ) );
+
+		return( matcher.find() );
+
+	}
 
 
 	/**
@@ -29,7 +183,7 @@ component
 	*/
 	public string function jreEscape( required string patternText ) {
 
-		return( createObject( "java", "java.util.regex.Pattern" ).quote( javaCast( "string", patternText ) ) );
+		return( PatternClass.quote( javaCast( "string", patternText ) ) );
 
 	}
 
@@ -413,6 +567,50 @@ component
 
 
 	/**
+	* I return the trailing portion of the string starting with the first match of the
+	* given pattern. If the pattern cannot be matched, the empty string is returned.
+	*/
+	public string function jreStartingWith(
+		required string targetText,
+		required string patternText
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+
+		if ( ! matcher.find() ) {
+
+			return( "" );
+
+		}
+
+		// NOTE: Technically, CFML Strings are Java Strings; however, since we're going to
+		// dip down into the Java layer methods, it's comforting to explicitly cast the
+		// value to the native Java type, if for no other reason to provide some
+		// documentation as to where these method are coming from.
+		return( javaCast( "string", targetText ).substring( matcher.start() ) );
+
+	}
+
+
+	/**
+	* I determine if the given pattern can be matched at the start of the input.
+	*/
+	public boolean function jreStartsWith(
+		required string targetText,
+		required string patternText
+		) {
+
+		// In order to limit the amount of text that we have to search, let's anchor the
+		// pattern to the beginning of the input. It's OK if the pattern already has
+		// anchor boundaries - they can be doubled-up without consequence.
+		var matcher = createMatcher( targetText, ( "\A" & patternText ) );
+
+		return( matcher.find() );
+
+	}
+
+
+	/**
 	* I determine if the entire target text can be matched by the given Java Regular
 	* Expression pattern.
 	* 
@@ -429,11 +627,9 @@ component
 
 	}
 
-
 	// ---
 	// PRIVATE METHODS.
 	// ---
-
 
 	/**
 	* I create a Java String Buffer used to incrementally gather pattern replacements.
@@ -493,7 +689,7 @@ component
 		required string patternText 
 		) {
 
-		var matcher = createObject( "java", "java.util.regex.Pattern" )
+		var matcher = PatternClass
 			.compile( javaCast( "string", patternText ) )
 			.matcher( javaCast( "string", targetText ) )
 		;
