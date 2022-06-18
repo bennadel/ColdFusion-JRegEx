@@ -49,6 +49,12 @@ This takes a Java Regular Expression pattern and returns a literal version of it
 literal version can then be used in other JRegEx methods. This is essentially what the 
 `quoteReplacement` argument is doing in some of the other methods.
 
+### `jreExtract( targetText, patternText )` :: Struct
+
+This takes the given Java Regular Expression pattern and returns a struct that holds all
+of the captured groups in the first match within the target text. If no match can be
+found, an empty struct is returned.
+
 ### `jreFind( targetText, patternText [, startingAt = 1 ] )` :: number
 
 This finds the offset of the first Java Regular Expression pattern match in the given 

@@ -1,6 +1,6 @@
 component
 	output = false
-	semvar = "0.0.3"
+	semvar = "0.0.4"
 	hint = "I provide a simplified API around the Regular Expression power of the underlying Java platform. There are no 'NoCase' method since Java RegEx Patterns can be made case-insensitive by start with a (?i) flag."
 	{
 
@@ -184,6 +184,28 @@ component
 	public string function jreEscape( required string patternText ) {
 
 		return( PatternClass.quote( javaCast( "string", patternText ) ) );
+
+	}
+
+
+	/**
+	* I return all of the captured groups in the first match of the given Java's Pattern.
+	* If not groups were captured, an empty struct is returned.
+	*/
+	public struct function jreExtract(
+		required string targetText,
+		required string patternText
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+
+		if ( matcher.find() ) {
+
+			return( createCapturedGroups( matcher ) );
+
+		}
+
+		return( structNew() );
 
 	}
 

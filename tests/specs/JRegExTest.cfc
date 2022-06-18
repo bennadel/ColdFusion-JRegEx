@@ -96,6 +96,25 @@ component
 	}
 
 
+	public void function test_jreExtract() {
+
+		var jre = new lib.JRegEx();
+
+		var extraction = jre.jreExtract( "abc", "(.)(.)(.)(.)?" );
+
+		assert( extraction[ 0 ] == "abc" );
+		assert( extraction[ 1 ] == "a" );
+		assert( extraction[ 2 ] == "b" );
+		assert( extraction[ 3 ] == "c" );
+		assert( extraction[ 4 ] == "" );
+
+		var extraction = jre.jreExtract( "abc", "(.)(.)(.)(.)" );
+
+		assert( structIsEmpty( extraction ) );
+
+	}
+
+
 	public void function test_jreFind() {
 
 		var jre = new lib.JRegEx();
