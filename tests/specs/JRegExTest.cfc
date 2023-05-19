@@ -238,6 +238,19 @@ component
 	}
 
 
+	public void function test_jreMatchFirst() {
+
+		var jre = new lib.JRegEx();
+
+		assert( jre.jreMatchFirst( "aabbaaaa", "z" ) == "" );
+		assert( jre.jreMatchFirst( "aabbaaaa", "a+" ) == "aa" );
+		assert( jre.jreMatchFirst( "aabbaaaa", "bb" ) == "bb" );
+		assert( jre.jreMatchFirst( "aabbaaaa", "bb{3,}" ) == "" );
+		assert( jre.jreMatchFirst( "aabbaaaa", "aa{3,}" ) == "aaaa" );
+
+	}
+
+
 	public void function test_jreReplace() {
 
 		var jre = new lib.JRegEx();

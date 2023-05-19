@@ -370,6 +370,28 @@ component
 
 
 	/**
+	* I return the first match of the given Java Regular Expression pattern against the
+	* given target text. If there are no matches, an empty string is returned.
+	*/
+	public string function jreMatchFirst(
+		required string targetText,
+		required string patternText
+		) {
+
+		var matcher = createMatcher( targetText, patternText );
+
+		if ( matcher.find() ) {
+
+			return( matcher.group() );
+
+		}
+
+		return( "" );
+
+	}
+
+
+	/**
 	* I use Java's Pattern / Matcher libraries to replace matched patterns using the
 	* given operator function or closure.
 	*

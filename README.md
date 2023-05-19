@@ -115,6 +115,10 @@ of structs in which each struct holds the captured groups of the match. The stru
 keyed based on the index of the captured group, within the pattern, with the `0` key 
 containing the entire match text.
 
+### `jreMatchFirst( targetText, patternText )` :: string
+
+This takes the given Java Regular Expression pattern and returns the first match of it that can be found within the given target text. If no match is found, the empty string is returned.
+
 ### `jreReplace( targetText, patternText, operator )` :: string
 
 This iterates over each match of the given Java Regular Expression pattern found within

@@ -1,7 +1,6 @@
 {
+    "name":"jregex-acf",
     "app":{
-        "cfengine":"adobe"
-    },
-    "name":"adobe-jregex",
-    "server":"adobe-jregex"
+        "cfengine":"adobe@2021"
+    }
 }
